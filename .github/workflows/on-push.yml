@@ -42,12 +42,12 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-latest
-            docker_image: ubuntu:20.04
+            docker_image: oraclelinux:8
             exe: ''
             artifact_os: linux
             artifact_arch: x86_64
           - runner: ubuntu-24.04-arm
-            docker_image: ubuntu:20.04
+            docker_image: oraclelinux:8
             exe: ''
             artifact_os: linux
             artifact_arch: arm64
@@ -77,11 +77,20 @@ jobs:
           echo ${{ runner.os }} ${{ runner.arch }}
       - name: Set up prerequisites (Linux-only)
         if: runner.os == 'Linux'
-        env:
-          DEBIAN_FRONTEND: noninteractive
         run: |
-          apt update
-          apt install -y curl git build-essential openjdk-21-jdk python zip unzip
+          dnf -y update
+          dnf install -y \
+            curl \
+            git \
+            gcc-c++ \
+            java-21-openjdk \
+            python3 \
+            zip \
+            unzip \
+            which
+
+          ln -sf /usr/bin/python3 /usr/bin/python
+
           # Set up Bazelisk
           curl -L -o /usr/local/bin/bazelisk https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-$([ "$(uname -m)" = "x86_64" ] && echo amd64 || echo arm64)
           chmod +x /usr/local/bin/bazelisk
